@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+
+use v5.10;
+use Data::Dumper;
+
+my %versions, %warnings, %features;
+
+while( <> ) {
+	chomp;
+	next unless -x;
+
+	my $version_output = `$_ -v`;
+	my( $version ) = $version_output =~ m/v(5.\d\d\.\d)\D/;
+	next unless $version;
+
+	my $features_output = `$_ features.pl`;
+
+	my( $warnings, $features ) = split /\f/, $features_output;
+
+	my @warnings = grep { /\S/ } split /\R/, $warnings;
+	my @features = grep { /\S/ } split /\R/, $features;
+
+	$versions{$version}{warnings} = \@warnings;
+	$versions{$version}{features} = \@features;
+
+	foreach my $w ( @warnings ) {
+		push @{ $warnings{$w} }, $version;
+		}
+
+	foreach my $f ( @features ) {
+		push @{ $features{$f} }, $version;
+		}
+	}
+
+say Dumper( \%versions, \%warnings, \%features );
+
+__END__
+This is perl, v5.10.1 (*) built for darwin-2level
+This is perl 5, version 12, subversion 1 (v5.12.1) built for darwin-2level
